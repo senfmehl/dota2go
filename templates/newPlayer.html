@@ -1,0 +1,12 @@
+{{define "newPlayer"}}
+{{template "header"}}
+
+<form action="/players/save/{{.player.Name}}" method="POST">
+	<div>PlayerID:<input type="integer" name="id">
+	</div>
+	<div>PlayerName:<input type="text" name="name">
+	</div>
+	<div><input type="submit" value="save"></div>
+</form>
+
+{{end}}
