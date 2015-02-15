@@ -1,12 +1,13 @@
 package main
 
 import (
-	"./dota2go/src/players"
-	_ "database/sql"
+	//_ "database/sql"
 	"github.com/gorilla/mux"
+	"github.com/senfmehl/dota2go/app"
 	"html/template"
 	"log"
 	"net/http"
+	_ "reflect"
 )
 
 var templates = template.Must(template.ParseGlob("templates/*"))
@@ -24,9 +25,10 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 func playersHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	player := vars["player"]
-	//log.Printf(player)
-	err := templates.ExecuteTemplate(w, "player", player)
+	// fetch player from db
+	var p app.Player
+	p.GetPlayer(vars["player"])
+	err := templates.ExecuteTemplate(w, "player", p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -34,20 +36,34 @@ func playersHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("INFO: Rendering of Template player worked fine")
 }
 
-func addPlayerHandler(w http.ResponseWriter, r *http.Request) {
+func newPlayerHandler(w http.ResponseWriter, r *http.Request) {
+	var p app.Player
+	err := templates.ExecuteTemplate(w, "newPlayer", player)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Renders a Form to add a new Player to the playerlist
 	// Stores Data input
 }
 
+func savePlayerHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	log.Println(vars)
+
+}
+
 func main() {
-	var p players.Player
-	/*
-		r := mux.NewRouter()
-		r.HandleFunc("/", homeHandler)
-		r.HandleFunc("/players/", addPlayerHandler).Methods("POST")
-		r.HandleFunc("/players/{player}", playersHandler)
-		http.Handle("/", r)
-		http.ListenAndServe(":8080", nil)
-	*/
+	//p := app.Player{Id: 1, Name: "Thees"}
+	//log.Println(reflect.TypeOf(p))
+	//log.Println(p)
+
+	r := mux.NewRouter()
+	r.HandleFunc("/", homeHandler)
+	r.HandleFunc("/players/", newPlayerHandler)
+	r.HandleFunc("/players/{player}", playersHandler)
+	r.HandleFunc("/players/save/{player}", savePlayerHandler)
+	http.Handle("/", r)
+	http.ListenAndServe(":8080", nil)
 }

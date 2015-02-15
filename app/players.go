@@ -1,9 +1,10 @@
-package dota2
+package app
 
 import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"log"
 	"os"
 )
 
@@ -27,27 +28,28 @@ func checkErr(err error) {
 }
 
 type Player struct {
-	id   int
-	name string
+	Id   int
+	Name string
 }
 
-func (p *Player) save() (int64, int64) {
+func (p *Player) Save() (int64, int64) {
 	db, err := sql.Open("mysql", "dota2go:hansberg@/dota2go")
 	checkErr(err)
 	defer db.Close()
 	stmt, err := db.Prepare("INSERT players SET id=?, name=?")
 	checkErr(err)
-	res, err := stmt.Exec(p.id, p.name)
+	res, err := stmt.Exec(p.Id, p.Name)
 	checkErr(err)
 	lastRowInserted, _ := res.LastInsertId()
 	rowsAffected, _ := res.RowsAffected()
 	return lastRowInserted, rowsAffected
 }
 
-func (p *Player) get() {
+func (p *Player) GetPlayer(name string) {
 	db, err := sql.Open("mysql", "dota2go:hansberg@/dota2go")
 	checkErr(err)
 	defer db.Close()
-	rows := db.QueryRow("SELECT id, name FROM players WHERE id=?", p.id)
-	rows.Scan(&p.id, &p.name)
+	rows := db.QueryRow("SELECT id, name FROM players WHERE name=?", name)
+	rows.Scan(&p.Id, &p.Name)
+	log.Println("Id Found:", p.Id)
 }
